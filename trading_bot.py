@@ -1,0 +1,38 @@
+import pandas as pd
+import numpy as np
+import yfinance as yf
+import matplotlib.pyplot as plt
+data = yf.download("GC=F", start="2026-01-01")
+data.columns = data.columns.get_level_values(0)
+data["SMA5"] = data["Close"].rolling(window=5).mean()
+data["SMA20"] = data["Close"].rolling(window=20).mean()
+data["Diff"] = data["Close"].diff()
+data["Gain"] = np.where(data["Diff"] > 0, data["Diff"], 0)
+data["Loss"] = np.where(data["Diff"] < 0, -data["Diff"], 0)
+data["Avg_Gain"] = data["Gain"].rolling(window=14).mean()
+data["Avg_Loss"] = data["Loss"].rolling(window=14).mean()
+rs = data["Avg_Gain"] / data["Avg_Loss"]
+data["RSI"] = 100 - (100 / (1 + rs))
+data["Signal"] = np.where((data["SMA5"] > data["SMA20"]) & (data["RSI"] < 70), 1, -1)
+data["Position"] = data["Signal"].diff()
+data = data.dropna()
+data["Daily_Return"] = data["Close"].pct_change()
+data["Bot_Return"] = data["Signal"].shift(1) * data["Daily_Return"]
+data["Capital"] = 10000 * (1 + data["Bot_Return"]).cumprod()
+data["Buy_Hold_Capital"] = 10000 * (1 + data["Daily_Return"]).cumprod()
+print("\n" + "=" * 45)
+print("Bot vs. Buy & Hold Report")
+print("=" * 45)
+print(f"Starting Capital: 10,000.00 USD")
+print(f"Bot Ending Capital: {data['Capital'].iloc[-1]:,.2f} USD")
+print(f"Buy & Hold Ending Capital: {data['Buy_Hold_Capital'].iloc[-1]:,.2f} USD")
+print("=" * 45)
+plt.figure(figsize=(14, 7))
+plt.plot(data["Close"], color="black", label="Gold (GC=F) Price")
+plt.plot(data["SMA5"], color="blue", label="5-Day SMA")
+plt.plot(data["SMA20"], color="orange", label="20-Day SMA")
+plt.scatter(data[data["Position"] > 0].index, data["SMA5"][data["Position"] > 0], label="Buy Signal", marker="^", color="green", s=100)
+plt.scatter(data[data["Position"] < 0].index, data["SMA5"][data["Position"] < 0], label="Sell Signal", marker="v", color="red", s=100)
+plt.title("Gold Futures - Algorithm Signal and Capital Simulation")
+plt.legend()
+plt.show()
