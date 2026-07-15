@@ -26,7 +26,7 @@ During a major market downtrend where a passive investor lost 14.2%, the algorit
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/kaan66tarikk-coder/algorithmic-trading-backtest-engine.git
+git clone [https://github.com/kaan66tarikk-coder/algorithmic-trading-backtest-engine.git](https://github.com/kaan66tarikk-coder/algorithmic-trading-backtest-engine.git)
 ```
 
 2. Install dependencies:
@@ -41,3 +41,8 @@ python trading_bot.py
 
 ## Disclaimer
 This project is for educational purposes only. The backtesting results do not guarantee future performance. This is not financial advice.
+
+---
+
+### Backtest Signal Visualization
+![Algorithm Signal and Capital Simulation](backtest_results.png)
